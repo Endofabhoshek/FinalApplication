@@ -7,17 +7,19 @@ public class TrekLocation {
     private String difficulty;
     private double rating;
     private ArrayList<String> description;
+    private  int Id;
 
     public TrekLocation() {
     }
 
     public TrekLocation(String name, String thumbnailUrl, String difficulty, double rating,
-                        ArrayList<String> description) {
+                        ArrayList<String> description, int id) {
         this.title = name;
         this.thumbnailUrl = thumbnailUrl;
         this.difficulty = difficulty;
         this.rating = rating;
         this.description = description;
+        this.Id = id;
     }
 
     public String getTitle() {
@@ -26,6 +28,14 @@ public class TrekLocation {
 
     public void setTitle(String name) {
         this.title = name;
+    }
+
+    public void setID(int id) {
+        this.Id = id;
+    }
+
+    public int getID() {
+        return this.Id;
     }
 
     public String getThumbnailUrl() {

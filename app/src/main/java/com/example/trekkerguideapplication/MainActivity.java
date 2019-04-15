@@ -1,5 +1,6 @@
 package com.example.trekkerguideapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceConfigurationError;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,12 +28,15 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.trekkerguideapplication.adapter.CustomListAdapter;
 import com.example.trekkerguideapplication.app.AppController;
 import com.example.trekkerguideapplication.model.TrekLocation;
@@ -76,17 +81,12 @@ public class MainActivity extends AppCompatActivity
         adapter = new CustomListAdapter(this, trekLocationList);
         listView.setAdapter(adapter);
 
-        pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Loading...");
-        pDialog.show();
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, Constants.API_LINK_V2, null,
+                new Response.Listener<JSONObject>() {
 
-        getActionBar().setBackgroundDrawable(
-                new ColorDrawable(Color.parseColor("#1b1b1b")));
-
-        JsonArrayRequest movieReq = new JsonArrayRequest(Constants.API_LINK_V2 + "get_all_treklocations.php",
-                new Response.Listener<JSONArray>() {
                     @Override
-                    public void onResponse(JSONArray response) {
+                    public void onResponse(JSONObject response) {
+
                         Log.d(TAG, response.toString());
                         hidePDialog();
 
@@ -100,7 +100,9 @@ public class MainActivity extends AppCompatActivity
                                 trekLocation.setThumbnailUrl(obj.getString("path"));
                                 trekLocation.setRating(((Number) obj.get("Test"))
                                         .doubleValue());
-                                trekLocation.setDifficulty("difficulty");
+                                trekLocation.setDifficulty(obj.getString("difficulty"));
+                                trekLocation.setID(((Number) obj.get("id")).intValue());
+
 
                                 // Genre is json array
                                 JSONArray descriptionsArry = obj.getJSONArray("description");
@@ -132,8 +134,20 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int trekid = trekLocationList.get(position).getID();
+
+                Intent intent = new Intent(MainActivity.this, TrekDetailActivity.class);
+                intent.putExtra("trekID", trekid);
+                startActivity(intent);
+            }
+        });
+
         // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(movieReq);
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+
     }
 
     @Override
